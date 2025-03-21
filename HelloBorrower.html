@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HelloBorrower</title>
+
+    <style>
+        body {
+            background: #0d1117;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            position: relative;
+            top: 100px;
+            text-align: center;
+            font-size: 32px;
+            color: #00ffcc;
+            text-shadow: 0 0 8px #00ffcc;
+        }
+
+
+
+        .wrapper2 {
+            position: relative;
+            top: 150px;
+            width: 50%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            border: 2px solid #00ffcc;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0px 0px 15px rgba(0, 255, 204, 0.8);
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .input-box label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .input-box input {
+            color: white;
+            width: 80%;
+            padding: 8px;
+            border: none;
+            border-radius: 10px;
+            background-color: #201e1e;
+            outline: none;
+        }
+
+        .input-box input:focus {
+            animation: rotateShadow 2s infinite linear;
+        }
+
+        @keyframes rotateShadow {
+            0% {
+                box-shadow: -2px -2px 8px 1px #ffffff, 2px 2px 8px 1px #00ffea;
+            }
+
+            25% {
+                box-shadow: -2px 2px 8px 1px #ffffff, 2px -2px 8px 1px #00ffea;
+            }
+
+            50% {
+                box-shadow: 2px 2px 8px 1px #ffffff, -2px -2px 8px 1px #00ffea;
+            }
+
+            75% {
+                box-shadow: 2px -2px 8px 1px #ffffff, -2px 2px 8px 1px #00ffea;
+            }
+
+            100% {
+                box-shadow: -2px -2px 8px 1px #ffffff, 2px 2px 8px 1px #00ffea;
+            }
+        }
+
+
+        button {
+            font-weight: bold;
+            border: solid #005766;
+            box-shadow: 0px 0px 15px rgba(0, 255, 204, 0.8);
+            position: relative;
+            left: 30px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #00fff2;
+            color: rgb(5, 4, 4);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: left 0.3s ease;
+            /* Smooth transition */
+        }
+
+        button:hover {
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #01505a;
+        }
+    </style>
+
+
+
+
+</head>
+
+<body class="borrowerinfo">
+
+    <h1>HELLO BORROWER</h1>
+
+    <div class="wrapper2">
+        <form action="BorrowHere.html" method="get">
+
+            <div class="input-box">
+                <label for="lastname">Lastname:</label>
+                <input type="text" id="lastname" placeholder="Enter Lastname" required>
+            </div>
+
+            <div class="input-box">
+                <label for="firstname">Firstname:</label>
+                <input type="text" id="firstname" placeholder="Enter Firstname" required>
+            </div>
+
+            <div class="input-box">
+                <label for="middlename">Middlename:</label>
+                <input type="text" id="middlename" name="optionalField" placeholder="(Optional)">
+            </div>
+
+
+
+
+            <label>
+                <input type="radio" name="role" value="student" onclick="toggleFields()" required> Student
+            </label>
+            <label>
+                <input type="radio" name="role" value="teacher" onclick="toggleFields()" required> Teacher
+            </label>
+
+            <div id="studentFields" style="display: none;">
+                <div class="input-box">
+                    <label for="studentInput">Grade:</label>
+                    <input type="number" id="studentInput" min="7" max="12" step="1" placeholder="Enter Grade">
+                </div>
+                <div class="input-box">
+                    <label for="studentSection">Section:</label>
+                    <input type="text" id="studentSection" placeholder="Enter Section">
+                </div>
+            </div>
+
+            <div id="teacherFields" style="display: none;">
+                <div class="input-box">
+                    <label for="teacherInput">Department:</label>
+                    <input type="text" id="teacherInput" placeholder="Enter Department">
+                </div>
+            </div>
+
+            <button type="submit">Submit</button>
+
+
+
+
+
+        </form>
+    </div>
+
+    <!--script-->
+    <script>
+
+
+
+        /*para sa grade*/
+        document.getElementById("studentInput").addEventListener("input", function () {
+            let value = parseInt(this.value);
+            if (value < 7 || value > 12) {
+                this.value = "";
+            }
+        });
+
+        /*ito naman para sa rdio wag mo na alamin di mo alam yon*/
+        function toggleFields() {
+            let role = document.querySelector('input[name="role"]:checked').value;
+            let studentDiv = document.getElementById("studentFields");
+            let teacherDiv = document.getElementById("teacherFields");
+            let studentInput = document.getElementById("studentInput");//grade yow
+            let teacherInput = document.getElementById("teacherInput");//dEPARTment
+            let studentSection = document.getElementById("studentSection");//section ng students
+            let submitButton = document.querySelector("button");
+
+            if (role === "student") {
+                studentDiv.style.display = "block";
+                teacherDiv.style.display = "none";
+                studentInput.setAttribute("required", "required");
+                studentSection.setAttribute("required", "required");//dito lang sya required
+                teacherInput.removeAttribute("required");
+            } else if (role === "teacher") {
+                studentDiv.style.display = "none";
+                teacherDiv.style.display = "block";
+                teacherInput.setAttribute("required", "required");
+                studentInput.removeAttribute("required");
+                studentSection.removeAttribute("required");//dito hinde na required wag kang tanga
+            }
+            submitButton.style.left = "0";
+        }
+
+
+
+
+
+        document.querySelector("form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Pigilan ang default submit action
+
+            // Kunin ang form data
+            let borrowerData = {
+                lastname: document.getElementById("lastname").value,
+                firstname: document.getElementById("firstname").value,
+                middlename: document.getElementById("middlename").value,
+                role: document.querySelector('input[name="role"]:checked') ? document.querySelector('input[name="role"]:checked').value : null,
+                grade: document.getElementById("studentInput") ? document.getElementById("studentInput").value : "",
+                section: document.getElementById("studentSection") ? document.getElementById("studentSection").value : "",
+                department: document.getElementById("teacherInput") ? document.getElementById("teacherInput").value : ""
+            };
+
+            // Tanggalin ang mga empty fields
+            Object.keys(borrowerData).forEach(key => {
+                if (!borrowerData[key]) {
+                    delete borrowerData[key];
+                }
+            });
+
+            // Kunin ang existing data sa localStorage
+            let borrowersList = JSON.parse(localStorage.getItem("borrowersData")) || [];
+
+            // Idagdag ang bagong borrower sa list
+            borrowersList.push(borrowerData);
+
+            //save ulit sa localStorage BRO
+            localStorage.setItem("borrowersData", JSON.stringify(borrowersList));
+
+            // redirect sa ibang page
+            window.location.href = "BorrowHere.html";
+        });
+
+
+
+
+        
+    
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

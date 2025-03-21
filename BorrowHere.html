@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BorrowHere</title>
+
+    <style>
+
+        body{
+            background: #0d1117;
+            color: #fff4f4;
+            font-family: Arial, sans-serif;
+        }
+
+       
+
+        tbody tr:hover {
+            background-color: #6990c4;
+            transition: background-color 0.3s ease;
+        }
+
+
+
+        /* Container Box */
+        .table-container {
+            width: 80%;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            background-color: #192a4b;
+            text-align: center;
+            box-shadow: 0px 0px 15px rgba(0, 153, 255, 0.8);;
+        }
+
+        table {
+            color: #0d1117;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #9bc6ff;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1a1cb1;
+            color: white;
+        }
+
+        /* Borrow Button */
+        button {
+            background-color: rgb(60, 113, 226);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: rgb(33, 8, 175);
+            transform: scale(1.1);
+        }
+
+        /* Disabled Borrow Button */
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: rgb(20, 12, 61);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content input {
+            color: white;
+            background-color: #1a1cb1;
+            width: 80%;
+            padding: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .modal-content button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .confirm-btn {
+            background-color: blue;
+            color: white;
+            border: none;
+        }
+
+        .cancel-btn {
+            background-color: red;
+            color: white;
+            border: none;
+        }
+        .cancel-btn:hover {
+            background-color: rgb(167, 29, 29);
+        }
+
+
+
+
+   /* Fullscreen Modal */
+#imageModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    overflow: hidden;
+    
+}
+
+#imageModal img {
+    max-width: 90%;
+    max-height: 90vh;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 132, 255, 0.8);;
+    
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
+
+/*Searchbar*/
+#searchBar {
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+}
+
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="table-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>WHAT ITEMS DO YOU NEED?</h2>
+            <input type="text" id="searchBar" placeholder="Search items..." onkeyup="filterTable()" 
+                style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; width: 200px;">
+        </div>
+        
+        <table>
+            
+            <thead>
+                <tr>
+                    <th>Name of Item</th>
+                    <th>Quantity</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="borrowModal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Quantity</h3>
+            <input type="number" id="borrowQuantity" min="1">
+            <br>
+            <button class="confirm-btn" onclick="confirmBorrow()">Confirm</button>
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+
+
+<!-- Image Modal -->
+<div id="imageModal" class="modal" onclick="closeImageModal()">
+    <span onclick="closeImageModal()" class="close-btn">&times;</span>
+    <img id="modalImage" src="" alt="Enlarged Image">
+</div>
+
+
+
+
+
+    <script>
+        let selectedIndex = null;
+
+        document.addEventListener("DOMContentLoaded", loadTable);
+
+        function loadTable() {
+            const table = document.querySelector("tbody");
+            table.innerHTML = "";
+
+            const items = JSON.parse(localStorage.getItem("items")) || [];
+
+            items.forEach((item, index) => {
+                const newRow = document.createElement("tr");
+
+                newRow.innerHTML = `
+                    <td>${item.name}</td>
+                    <td class="quantity">${item.quantity}</td>
+                    <td><img src="${item.image}" alt="Item Image" width="50" style="cursor: pointer;" onclick="openImageModal('${item.image}')"></td>
+                    <td>${item.description}</td>
+                    <td>
+                        <button onclick="openModal(${index})" ${item.quantity === 0 ? "disabled" : ""}>
+                            Borrow
+                        </button>
+                    </td>
+                `;
+
+                table.appendChild(newRow);
+            });
+        }
+
+        function openModal(index) {
+            selectedIndex = index;
+            document.getElementById("borrowModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("borrowModal").style.display = "none";
+        }
+
+       
+
+
+        function confirmBorrow() {
+    let items = JSON.parse(localStorage.getItem("items")) || [];
+    let borrowersList = JSON.parse(localStorage.getItem("borrowersData")) || [];
+    let borrowHistory = JSON.parse(localStorage.getItem("borrowHistory")) || [];
+
+    let availableQuantity = items[selectedIndex].quantity;
+    let borrowInput = document.getElementById("borrowQuantity").value;
+    let borrowQuantity = parseInt(borrowInput);
+
+    if (isNaN(borrowQuantity) || borrowQuantity <= 0) {
+        alert("Invalid input! Please enter a valid number.");
+        return;
+    }
+
+    if (borrowQuantity > availableQuantity) {
+        alert("Not enough stock available!");
+        return;
+    }
+
+    
+    let borrower = borrowersList[borrowersList.length - 1]; 
+
+    if (!borrower) {
+        alert("No borrower found! Please register first.");
+        return;
+    }
+
+    // Bawas sa stock
+    items[selectedIndex].quantity -= borrowQuantity;
+    localStorage.setItem("items", JSON.stringify(items));
+
+    // Save borrow data with timestamp
+    let borrowData = {
+        borrowerName: `${borrower.firstname} ${borrower.lastname}`,
+        itemName: items[selectedIndex].name,
+        quantityBorrowed: borrowQuantity,
+        timeBorrowed: new Date().toLocaleString()
+    };
+
+    borrowHistory.push(borrowData);
+    localStorage.setItem("borrowHistory", JSON.stringify(borrowHistory));
+
+    closeModal();
+    loadTable();
+    alert(`You borrowed ${borrowQuantity} ${items[selectedIndex].name}.`);
+}
+
+
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+        let borrowersList = JSON.parse(localStorage.getItem("borrowersData")) || [];
+        
+        let container = document.getElementById("borrowersListContainer");
+        if (container) {
+            container.innerHTML = "";
+            borrowersList.forEach((borrower, index) => {
+                let div = document.createElement("div");
+                div.innerHTML = `<strong>${borrower.firstname} ${borrower.lastname}</strong> - ${borrower.role}`;
+                container.appendChild(div);
+            });
+        }
+    });
+
+
+
+
+
+
+    function openImageModal(imageSrc) {
+    document.getElementById("modalImage").src = imageSrc;
+    document.getElementById("imageModal").style.display = "block";
+}
+
+function closeImageModal() {
+    document.getElementById("imageModal").style.display = "none";
+}
+
+    
+function filterTable() {
+    let input = document.getElementById("searchBar").value.toLowerCase();
+    let rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+        let itemName = row.cells[0].textContent.toLowerCase();
+        if (itemName.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+ 
+    </script>
+
+</body>
+
+</html>
